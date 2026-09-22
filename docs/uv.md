@@ -8,22 +8,6 @@ Use `uv` primarily on a per-project basis: each project has its own `.venv` envi
 
 This differs from [GEOSpyD](https://github.com/GMAO-SI-Team/GEOSpyD), which is a broad, curated stack intended to make many scientific packages available from one installation. If you need a package not included in your own GEOSpyD installation, it can be added with `pip`, but doing so changes that environment and can introduce version conflicts. Use a `uv` project when you want isolation or a dependency set specific to your work.
 
-## Install uv
-
-On a local macOS or Linux workstation, install `uv` using its standalone installer:
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Open a new terminal, then confirm the installation:
-
-```bash
-uv --version
-```
-
-For other installation methods, see the [uv installation documentation](https://docs.astral.sh/uv/getting-started/installation/).
-
 ## NCCS Discover and NAS
 
 On NCCS Discover and NAS, configure `uv` to keep its executable, cache, managed Python installations, and tools on `$NOBACKUP` storage rather than in your backed-up home directory. Home-directory quotas on both systems are intentionally small, and `uv` caches, managed Python installations, tools, and virtual environments can consume substantial space.
@@ -82,7 +66,7 @@ source ~/.bashrc
 source ~/.tcshrc
 ```
 
-Install `uv` with its standalone installer, then verify that the configured location is being used:
+After reloading the shell configuration, install `uv` with its standalone installer. `UV_INSTALL_DIR` directs the installer to place the executable in `$NOBACKUP/uv/bin`:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -91,6 +75,24 @@ uv --version
 ```
 
 The path reported by `command -v uv` should be inside `$UV_ROOT/bin`, for example `$NOBACKUP/uv/bin/uv`. On these systems, create project directories and direct virtual environments on project or `$NOBACKUP` storage, not under `$HOME`.
+
+## Install uv on a local workstation
+
+On a local macOS or Linux workstation, install `uv` using its standalone installer:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Open a new terminal, then confirm the installation:
+
+```bash
+uv --version
+```
+
+The standalone installer normally adds its installation directory to `PATH`. On macOS and Linux, its default installation directory is `$HOME/.local/bin`. If `uv --version` is not found after opening a new terminal, confirm that `$HOME/.local/bin` is on `PATH` and follow the installer output to update the appropriate shell startup file.
+
+For other installation methods, see the [uv installation documentation](https://docs.astral.sh/uv/getting-started/installation/).
 
 ## Start a project
 
