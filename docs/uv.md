@@ -4,7 +4,7 @@
 
 ## How to use uv
 
-Use `uv` primarily on a per-project basis: each project has its own `.venv` environment and records its dependencies in `pyproject.toml` and `uv.lock`. This keeps unrelated projects from changing one another's dependencies and lets another user recreate the same environment.
+Use `uv` primarily on a [per-project basis](https://docs.astral.sh/uv/concepts/projects/): each project has its own `.venv` environment and records its dependencies in `pyproject.toml` and `uv.lock`. This keeps unrelated projects from changing one another's dependencies and lets another user recreate the same environment.
 
 This differs from [GEOSpyD](https://github.com/GMAO-SI-Team/GEOSpyD), which is a broad, curated stack intended to make many scientific packages available from one installation. If you need a package not included in your own GEOSpyD installation, it can be added with `pip`, but doing so changes that environment and can introduce version conflicts. Use a `uv` project when you want isolation or a dependency set specific to your work.
 
@@ -92,7 +92,7 @@ uv --version
 
 The standalone installer normally adds its installation directory to `PATH`. On macOS and Linux, its default installation directory is `$HOME/.local/bin`. If `uv --version` is not found after opening a new terminal, confirm that `$HOME/.local/bin` is on `PATH` and follow the installer output to update the appropriate shell startup file.
 
-For other installation methods, see the [uv installation documentation](https://docs.astral.sh/uv/getting-started/installation/).
+For other installation methods and installer options, see the [uv installation documentation](https://docs.astral.sh/uv/getting-started/installation/) and [installer reference](https://docs.astral.sh/uv/reference/installer/).
 
 ## Start a project
 
@@ -116,7 +116,27 @@ Run Python within the project's managed environment:
 uv run python
 ```
 
-`uv` records direct dependencies in `pyproject.toml` and resolves exact versions in `uv.lock`. Commit both files to version control for reproducible environments.
+`uv` records direct dependencies in `pyproject.toml` and resolves exact versions in `uv.lock`. Commit both files to version control for reproducible environments. For project structure, dependency management, and locking details, see the [uv project documentation](https://docs.astral.sh/uv/concepts/projects/).
+
+## Activate a project environment
+
+`uv run` automatically uses the project's `.venv`, so activation is optional. To use the environment's `python`, `python3`, and installed command-line programs directly, activate it from the project directory instead. See the upstream guide to [using Python environments](https://docs.astral.sh/uv/pip/environments/) for more detail.
+
+For Bash or similar shells:
+
+```bash
+source .venv/bin/activate
+python3
+```
+
+For `tcsh`:
+
+```tcsh
+source .venv/bin/activate.csh
+python3
+```
+
+The shell prompt normally indicates that the environment is active. Run `deactivate` when finished. Do not activate or modify another project's `.venv`; use that project's directory and environment instead.
 
 ## Use an existing project
 
@@ -140,17 +160,17 @@ uv pip install numpy xarray
 
 Use this workflow sparingly. When the work needs to be repeated, shared, or committed to a repository, initialize a `uv` project and add the dependencies with `uv add` instead. That records the requested dependencies and creates a lock file.
 
-For command-line applications that should be available outside a particular project, use `uv tool install` rather than adding them to a project's environment. For example:
+For command-line applications that should be available outside a particular project, use [`uv tool`](https://docs.astral.sh/uv/concepts/tools/) rather than adding them to a project's environment. For example:
 
 ```bash
 uv tool install ruff
 ```
 
-`uv` manages Python interpreters separately from project environments. A managed Python installation is not a shared package environment.
+`uv` manages [Python interpreters](https://docs.astral.sh/uv/concepts/python-versions/) separately from project environments. A managed Python installation is not a shared package environment.
 
 ## Manage the cache
 
-The cache can grow over time. Check its location and remove unused entries with:
+The [cache](https://docs.astral.sh/uv/concepts/cache/) can grow over time. Check its location and remove unused entries with:
 
 ```bash
 uv cache dir
