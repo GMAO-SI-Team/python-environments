@@ -10,9 +10,9 @@ This differs from [GEOSpyD](https://github.com/GMAO-SI-Team/GEOSpyD), which is a
 
 ## NCCS Discover and NAS
 
-On NCCS Discover and NAS, configure `uv` to keep its executable, cache, managed Python installations, and tools on `$NOBACKUP` storage rather than in your backed-up home directory. Home-directory quotas on both systems are intentionally small, and `uv` caches, managed Python installations, tools, and virtual environments can consume substantial space.
+On NCCS Discover and NAS, configure `uv` to keep its executable, cache, managed Python installations, and tools on `$NOBACKUP` storage rather than in your backed-up home directory. Home-directory quotas on both systems are intentionally small, and `uv` caches, managed Python installations, tools, and virtual environments can consume substantial space. See the [suggested NCCS shell configuration](https://github.com/GEOS-ESM/GEOSgcm/wiki/Suggested-NCCS-Resources#311-shell-configuration) for the interactive-shell blocks in the startup files. Add these lines to the appropriate parts of your existing shell configuration; do not replace its module setup.
 
-For Bash, add the following to `~/.bashrc`:
+For Bash, add the following to `~/.bashrc`. Keep the storage settings outside the interactive block so non-interactive shells can use them too; only the interactive command-line `PATH` change goes inside:
 
 ```bash
 export UV_ROOT="$NOBACKUP/uv"
@@ -22,16 +22,19 @@ export UV_PYTHON_CACHE_DIR="$UV_ROOT/cache/python"
 export UV_TOOL_DIR="$UV_ROOT/tools"
 export UV_PYTHON_INSTALL_DIR="$UV_ROOT/python"
 export UV_TOOL_BIN_DIR="$UV_ROOT/bin"
-export UV_PYTHON_BIN_DIR="$UV_ROOT/bin"
+export UV_PYTHON_BIN_DIR="$UV_ROOT/python-bin"
 export UV_INSTALL_DIR="$UV_ROOT/bin"
+export UV_NO_MODIFY_PATH=1
 
 # Use copies instead of hard links across filesystems.
 export UV_LINK_MODE=copy
 
-export PATH="$UV_ROOT/bin:$PATH"
+if [[ $- == *i* ]]; then
+    export PATH="$UV_ROOT/bin:$PATH"
+fi
 ```
 
-For `tcsh`, add the following to `~/.tcshrc`:
+For `tcsh`, add the following to `~/.tcshrc`, with the storage settings outside the interactive block and the `PATH` change inside:
 
 ```tcsh
 setenv UV_ROOT "$NOBACKUP/uv"
@@ -41,32 +44,27 @@ setenv UV_PYTHON_CACHE_DIR "$UV_ROOT/cache/python"
 setenv UV_TOOL_DIR "$UV_ROOT/tools"
 setenv UV_PYTHON_INSTALL_DIR "$UV_ROOT/python"
 setenv UV_TOOL_BIN_DIR "$UV_ROOT/bin"
-setenv UV_PYTHON_BIN_DIR "$UV_ROOT/bin"
+setenv UV_PYTHON_BIN_DIR "$UV_ROOT/python-bin"
 setenv UV_INSTALL_DIR "$UV_ROOT/bin"
+setenv UV_NO_MODIFY_PATH 1
 
 # Use copies instead of hard links across filesystems.
 setenv UV_LINK_MODE copy
 
-setenv PATH "$UV_ROOT/bin:$PATH"
+if ($?prompt) then
+    setenv PATH "$UV_ROOT/bin:$PATH"
+endif
 ```
 
-Create the directories, then reload the appropriate shell configuration:
+`UV_NO_MODIFY_PATH=1` prevents the standalone installer and `uv self update` from adding their own `PATH` changes to shell startup files. Managed Python executables go in `$UV_ROOT/python-bin`, outside the `PATH` addition above, so they cannot take precedence over a module-provided Python. If a batch job does not load these startup files, set the storage variables in its job script before running `uv`. In that case, use `"$UV_ROOT/bin/uv"` or add `$UV_ROOT/bin` to the job's `PATH` explicitly.
+
+Open a new interactive terminal to load the shell configuration, then create the directories:
 
 ```bash
-mkdir -p "$UV_ROOT"/{bin,cache,tools,python}
+mkdir -p "$UV_ROOT"/{bin,cache,tools,python,python-bin}
 ```
 
-```bash
-# Bash
-source ~/.bashrc
-```
-
-```tcsh
-# tcsh
-source ~/.tcshrc
-```
-
-After reloading the shell configuration, install `uv` with its standalone installer. `UV_INSTALL_DIR` directs the installer to place the executable in `$NOBACKUP/uv/bin`:
+Install `uv` with its standalone installer. `UV_INSTALL_DIR` directs the installer to place the executable in `$NOBACKUP/uv/bin`:
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -75,6 +73,8 @@ uv --version
 ```
 
 The path reported by `command -v uv` should be inside `$UV_ROOT/bin`, for example `$NOBACKUP/uv/bin/uv`. On these systems, create project directories and direct virtual environments on project or `$NOBACKUP` storage, not under `$HOME`.
+
+In GEOS model sessions using `module load GEOSpyD`, leave the module's Python in control. Use a separate shell for `uv` projects and do not activate a project `.venv` in the model session. In particular, `uv pip install` can target an active Conda environment; check your active environment before using the pip-style commands below.
 
 ## Install uv on a local workstation
 
@@ -155,7 +155,7 @@ For a short-lived experiment or a project that does not yet use `pyproject.toml`
 
 ```bash
 uv venv --python 3.12
-uv pip install numpy xarray
+uv pip install --python .venv/bin/python numpy xarray
 ```
 
 Use this workflow sparingly. When the work needs to be repeated, shared, or committed to a repository, initialize a `uv` project and add the dependencies with `uv add` instead. That records the requested dependencies and creates a lock file.
