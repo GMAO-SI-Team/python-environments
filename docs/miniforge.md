@@ -67,7 +67,7 @@ Choose a distinct environment path for each project. The full conda-forge URL an
 export ENV_PREFIX="$MINIFORGE_ROOT/envs/my-project"
 "$MINIFORGE_ROOT/bin/mamba" create -p "$ENV_PREFIX" \
   --override-channels -c https://conda.anaconda.org/conda-forge \
-  python=3.12 numpy xarray
+  python=3.13 numpy xarray
 conda activate "$ENV_PREFIX"
 python --version
 ```
@@ -93,7 +93,7 @@ channels:
   - https://conda.anaconda.org/conda-forge
   - nodefaults
 dependencies:
-  - python=3.12
+  - python=3.13
   - numpy
   - xarray
   - scipy
