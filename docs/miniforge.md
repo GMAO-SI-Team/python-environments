@@ -6,7 +6,7 @@ The examples below use Bash and `mamba` for package installation. They explicitl
 
 ## Install on a local macOS or Linux workstation
 
-Choose the [upstream installer](https://github.com/conda-forge/miniforge#unix-like-platforms-macos-linux--wsl) for your OS and architecture. Use batch mode so the installer does not change shell startup files:
+Choose the [upstream installer](https://github.com/conda-forge/miniforge#unix-like-platforms-macos-linux--wsl) for your OS and architecture. Batch mode installs Miniforge without changing shell startup files, so you can decide whether to initialize Conda afterward:
 
 ```bash
 export MINIFORGE_ROOT="$HOME/miniforge3"
@@ -15,7 +15,16 @@ curl -fLsS -o "Miniforge3-$(uname)-$(uname -m).sh" \
 bash "Miniforge3-$(uname)-$(uname -m).sh" -b -p "$MINIFORGE_ROOT"
 ```
 
-Use a new installation path; the installer will not overwrite an existing directory. The base environment is for managing environments, not for installing your project's packages. You can remove the downloaded installer after a successful installation. If you use the interactive installer instead, decline its offer to run `conda init`.
+Use a new installation path; the installer will not overwrite an existing directory. The base environment is for managing environments, not for installing your project's packages. You can remove the downloaded installer after a successful installation.
+
+On a personal workstation, running `conda init` is a reasonable convenience if you use Conda regularly. For Bash, you can initialize it after the batch install (or accept the interactive installer's offer). On macOS with zsh, use `init zsh` instead of `init bash`:
+
+```bash
+"$MINIFORGE_ROOT/bin/conda" init bash
+"$MINIFORGE_ROOT/bin/conda" config --set auto_activate_base false
+```
+
+Open a new shell afterward. The second command keeps `base` from activating automatically; activate a project environment when you need it. If you prefer not to change your shell startup files, use the on-demand setup below instead. In either case, set `MINIFORGE_ROOT` in each shell where you use the commands in this guide (or define it in your workstation's shell configuration).
 
 ## Install on NCCS Discover or NAS
 
@@ -29,6 +38,8 @@ bash "$NOBACKUP/Miniforge3-$(uname)-$(uname -m).sh" -b -p "$MINIFORGE_ROOT"
 ```
 
 The installer URL selects the Linux architecture of the machine running the command; check the [upstream platform requirements](https://github.com/conda-forge/miniforge#requirements-and-installers) if the installer fails. Do not reuse a pre-existing installation path. The downloaded installer can be removed after installation.
+
+**Do not run `conda init` on Discover or NAS**, including when prompted by the interactive installer. Do not put `conda.sh`, `conda activate`, or a Miniforge `PATH` change in `~/.bashrc` or another shell startup file there. Modules control compilers and Python on these systems; automatic Conda setup can interfere with module-provided environments.
 
 An existing `MAMBA_ROOT_PREFIX` (for example, one pointing to a separate `mamba-cache`) is not a portable setting for the Miniforge package cache. Set it to this installation's root while using this Miniforge, and specify the package cache and environment directories separately as below.
 
@@ -44,7 +55,7 @@ export CONDA_CHANNEL_PRIORITY=strict
 source "$MINIFORGE_ROOT/etc/profile.d/conda.sh"
 ```
 
-**Do not run `conda init` or put `conda.sh`, `conda activate`, or a Miniforge `PATH` change in `~/.bashrc` or another shell startup file.** Even inside the interactive-shell block in the [suggested NCCS shell configuration](https://github.com/GEOS-ESM/GEOSgcm/wiki/Suggested-NCCS-Resources#311-shell-configuration), automatic Conda setup can interfere with the GEOSpyD environment supplied through `g5_modules` for GEOS models. In a GEOS model session that uses `module load GEOSpyD`, let that module's Python take precedence: do not run this Miniforge setup block or activate a personal Conda environment in the same session. Use a separate shell for your own Miniforge environments. Run the block above only when you want this Miniforge in the current shell; in batch jobs using Miniforge, run it explicitly in the job script. The installer and all large package files stay outside `$HOME` on Discover/NAS.
+On a workstation where you already ran `conda init`, Conda is available in new shells and the `source` line is unnecessary; use the exports above it when following this guide to keep the installation, cache, environments, and channel priority explicit. On Discover/NAS, run the entire block only when you want Miniforge in the current shell; in batch jobs using Miniforge, run it explicitly in the job script. Even inside the interactive-shell block in the [suggested NCCS shell configuration](https://github.com/GEOS-ESM/GEOSgcm/wiki/Suggested-NCCS-Resources#311-shell-configuration), automatic Conda setup can interfere with the GEOSpyD environment supplied through `g5_modules` for GEOS models. In a GEOS model session that uses `module load GEOSpyD`, let that module's Python take precedence: do not run this Miniforge setup block or activate a personal Conda environment in the same session. Use a separate shell for your own Miniforge environments. The installer and all large package files stay outside `$HOME` on Discover/NAS.
 
 Use `"$MINIFORGE_ROOT/bin/mamba"` in the commands below so that an existing `mamba` elsewhere on `PATH` is not selected. `CONDA_PKGS_DIRS` and `CONDA_ENVS_PATH` make cache and environment placement explicit for both mamba and conda; keeping them on the same filesystem lets packages be hard-linked where possible. Strict channel priority is an additional safeguard, but it does not exclude `defaults` on its own.
 

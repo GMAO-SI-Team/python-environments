@@ -20,7 +20,7 @@ For NCCS Discover or NAS, follow the guide's [cluster-specific setup](docs/uv.md
 
 ## Miniforge + mamba
 
-[Miniforge](https://github.com/conda-forge/miniforge) includes `mamba` and starts with conda-forge rather than Anaconda's `defaults` channel. Create small environments and add only the packages you need. The [Miniforge guide](docs/miniforge.md) covers workstations and keeping the installation, package cache, and environments off `$HOME` on Discover and NAS, with explicit conda-forge-only commands and package-origin checks. Use it on demand rather than initializing Conda in shell startup files. In GEOS model sessions, `module load GEOSpyD` should provide the Python environment; use personal Miniforge environments in separate shells.
+[Miniforge](https://github.com/conda-forge/miniforge) includes `mamba` and starts with conda-forge rather than Anaconda's `defaults` channel. Create small environments and add only the packages you need. The [Miniforge guide](docs/miniforge.md) covers workstations and keeping the installation, package cache, and environments off `$HOME` on Discover and NAS, with explicit conda-forge-only commands and package-origin checks. On a personal workstation, `conda init` is optional; on Discover and NAS, use Miniforge on demand rather than initializing Conda in shell startup files, so it does not interfere with module-provided environments. In GEOS model sessions, `module load GEOSpyD` should provide the Python environment; use personal Miniforge environments in separate shells.
 
 ## GEOSpyD
 
